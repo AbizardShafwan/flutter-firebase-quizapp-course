@@ -1,69 +1,34 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:apple_sign_in/apple_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _db = Firestore.instance;
-
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  
   // Firebase user one-time fetch
-  Future<FirebaseUser> get getUser => _auth.currentUser();
+  User get getUser => _auth.currentUser;
 
   // Firebase user a realtime stream
-  Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
-
-  // Determine if Apple Signin is available on device
-  Future<bool> get appleSignInAvailable => AppleSignIn.isAvailable();
-
-  /// Sign in with Apple
-  Future<FirebaseUser> appleSignIn() async {
-    try {
-      final AuthorizationResult appleResult =
-          await AppleSignIn.performRequests([
-        AppleIdRequest(requestedScopes: [Scope.email, Scope.fullName])
-      ]);
-
-      if (appleResult.error != null) {
-        // handle errors from Apple
-      }
-
-      final AuthCredential credential =
-          OAuthProvider(providerId: 'apple.com').getCredential(
-        accessToken:
-            String.fromCharCodes(appleResult.credential.authorizationCode),
-        idToken: String.fromCharCodes(appleResult.credential.identityToken),
-      );
-
-      AuthResult firebaseResult = await _auth.signInWithCredential(credential);
-      FirebaseUser user = firebaseResult.user;
-
-      // Update user data
-      updateUserData(user);
-
-      return user;
-    } catch (error) {
-      print(error);
-      return null;
-    }
-  }
+  Stream<User> get user => _auth.authStateChanges();
 
   /// Sign in with Google
-  Future<FirebaseUser> googleSignIn() async {
+  Future<User> googleSignIn() async {
     try {
       GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
       GoogleSignInAuthentication googleAuth =
           await googleSignInAccount.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
+      final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      AuthResult result = await _auth.signInWithCredential(credential);
-      FirebaseUser user = result.user;
+      
+      UserCredential result = await _auth.signInWithCredential(credential);
+      User user = result.user;
 
       // Update user data
       updateUserData(user);
@@ -76,20 +41,20 @@ class AuthService {
   }
 
   /// Anonymous Firebase login
-  Future<FirebaseUser> anonLogin() async {
-    AuthResult result = await _auth.signInAnonymously();
-    FirebaseUser user = result.user;
+  Future<User> anonLogin() async {
+    UserCredential result = await _auth.signInAnonymously();
+    User user = result.user;
 
     updateUserData(user);
     return user;
   }
 
-  /// Updates the User's data in Firestore on each new login
-  Future<void> updateUserData(FirebaseUser user) {
-    DocumentReference reportRef = _db.collection('reports').document(user.uid);
+  /// Updates the User's data in FirebaseFirestore on each new login
+  Future<void> updateUserData(User user) {
+    DocumentReference reportRef = _db.collection('reports').doc(user.uid);
 
-    return reportRef.setData({'uid': user.uid, 'lastActivity': DateTime.now()},
-        merge: true);
+    return reportRef.set({'uid': user.uid, 'lastActivity': DateTime.now()},
+        SetOptions(merge: true), );
   }
 
   // Sign out

@@ -21,7 +21,7 @@ class TopicsScreen extends StatelessWidget {
                 IconButton(
                   icon: Icon(FontAwesomeIcons.userCircle,
                       color: Colors.pink[200]),
-                  onPressed: () => Navigator.pushNamed(context, '/profile'),
+                  onPressed: () => {Navigator.pushNamed(context, '/profile')},
                 )
               ],
             ),

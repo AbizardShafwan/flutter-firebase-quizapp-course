@@ -4,7 +4,7 @@ description: Realtime Quiz app built with Flutter & Firebase
 version: 1.4.0
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.5.2 <3.0.0"
   flutter: ^1.12.13
 
 dependencies:
@@ -15,17 +15,17 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
 
-  firebase_core: 0.4.4+3
-  firebase_analytics: 5.0.11
+  firebase_core: ^0.7.0
+  firebase_analytics: ^7.0.1
 
-  cloud_firestore: 0.13.4+2
+  cloud_firestore: ^0.16.0
 
-  firebase_auth: 0.15.5+3
-  google_sign_in: 4.4.1
-  apple_sign_in: 0.1.0
+  firebase_auth: ^0.20.0+1
+  google_sign_in: ^4.5.9
 
-  rxdart: 0.23.1
-  provider: 4.0.5
+  rxdart: ^0.25.0
+  # provider: 4.0.5
+  provider: ^4.3.3
   font_awesome_flutter: 8.8.1
 
 dev_dependencies:

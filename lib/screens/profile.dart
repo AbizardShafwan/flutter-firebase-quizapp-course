@@ -10,7 +10,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Report report = Provider.of<Report>(context);
-    FirebaseUser user = Provider.of<FirebaseUser>(context);
+    User user = Provider.of<User>(context);
 
     if (user != null) {
 
@@ -24,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (user.photoUrl != null)
+            if (user.photoURL != null)
               Container(
                 width: 100,
                 height: 100,
@@ -32,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                    image: NetworkImage(user.photoUrl),
+                    image: NetworkImage(user.photoURL),
                   ),
                 ),
               ),
@@ -40,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
             Spacer(),
             if (report != null)
               Text('${report.total ?? 0}',
-                  style: Theme.of(context).textTheme.display3),
+                style: Theme.of(context).textTheme.display3),
             Text('Quizzes Completed',
                 style: Theme.of(context).textTheme.subhead),
             Spacer(),

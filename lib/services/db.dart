@@ -7,12 +7,12 @@ import './globals.dart';
 
 
 class Document<T> {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String path; 
   DocumentReference ref;
 
   Document({ this.path }) {
-    ref = _db.document(path);
+    ref = _db.doc(path);
   }
 
   Future<T> getData() {
@@ -24,13 +24,13 @@ class Document<T> {
   }
 
   Future<void> upsert(Map data) {
-    return ref.setData(Map<String, dynamic>.from(data), merge: true);
+    return ref.set(Map<String, dynamic>.from(data), SetOptions(merge: true));
   }
 
 }
 
 class Collection<T> {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String path; 
   CollectionReference ref;
 
@@ -39,18 +39,18 @@ class Collection<T> {
   }
 
   Future<List<T>> getData() async {
-    var snapshots = await ref.getDocuments();
-    return snapshots.documents.map((doc) => Global.models[T](doc.data) as T ).toList();
+    var snapshots = await ref.get();
+    return snapshots.docs.map((doc) => Global.models[T](doc.data()) as T ).toList();
   }
 
   Stream<List<T>> streamData() {
-    return ref.snapshots().map((list) => list.documents.map((doc) => Global.models[T](doc.data) as T) );
+    return ref.snapshots().map((list) => list.docs.map((doc) => Global.models[T](doc.data) as T) );
   }
 }
 
 
 class UserData<T> {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final String collection;
 
@@ -59,7 +59,7 @@ class UserData<T> {
 
   Stream<T> get documentStream {
 
-    return _auth.onAuthStateChanged.switchMap((user) {
+    return _auth.authStateChanges().switchMap((user) {
       if (user != null) {
           Document<T> doc = Document<T>(path: '$collection/${user.uid}'); 
           return doc.streamData();
@@ -70,7 +70,7 @@ class UserData<T> {
   }
 
   Future<T> getDocument() async {
-    FirebaseUser user = await _auth.currentUser();
+    User user = await _auth.currentUser;
 
     if (user != null) {
       Document doc = Document<T>(path: '$collection/${user.uid}'); 
@@ -82,7 +82,7 @@ class UserData<T> {
   }
 
   Future<void> upsert(Map data) async {
-    FirebaseUser user = await _auth.currentUser();
+    User user = await _auth.currentUser;
     Document<T> ref = Document(path:  '$collection/${user.uid}');
     return ref.upsert(data);
   }
